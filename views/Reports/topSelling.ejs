@@ -1,0 +1,29 @@
+<h1>Top 50 Libros Más Vendidos</h1>
+<table id="topSellingTable" class="display">
+  <thead>
+    <tr>
+      <th>Libro</th>
+      <th>Ventas totales</th>
+      <th>Autor</th>
+      <th>Top 5 en año de publicación</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% books.forEach(b => { %>
+      <tr>
+        <td><%= b.name %></td>
+        <td><%= b.totalSales ? b.totalSales.toLocaleString() : '0' %></td>
+        <td><%= b.authorName || 'Desconocido' %></td>
+        <td><%= b.wasTop5 ? 'Sí' : 'No' %></td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" />
+<script>
+$(document).ready(function() {
+  $('#topSellingTable').DataTable();
+});
+</script>

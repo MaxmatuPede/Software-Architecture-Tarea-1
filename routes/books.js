@@ -29,10 +29,7 @@ router.post('/', async (req, res) => {
     const savedBook = await book.save();
     const populatedBook = await Book.findById(savedBook._id).populate('author');
     
-    res.status(201).json({
-      ...populatedBook.toObject(),
-      totalSales: 0
-    });
+    res.redirect('/?model=books');
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -63,10 +60,7 @@ router.put('/:id', async (req, res) => {
     const sales = await Sales.find({ book: book._id });
     const totalSales = sales.reduce((sum, sale) => sum + sale.sales, 0);
     
-    res.json({
-      ...book.toObject(),
-      totalSales: totalSales
-    });
+    res.redirect('/?model=books');
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

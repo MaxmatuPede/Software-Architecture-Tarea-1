@@ -4,10 +4,6 @@ const Book = require('./models/Book');
 const Review = require('./models/Review');
 const Sales = require('./models/Sales');
 
-
-mongoose.connect('mongodb://localhost:27017/bookreview');
-
-
 const countries = ['Colombia', 'Argentina', 'España', 'México', 'Chile', 'Perú', 'Estados Unidos', 'Reino Unido', 'Francia', 'Italia'];
 const genres = ['Realismo mágico', 'Novela histórica', 'Ciencia ficción', 'Romance', 'Thriller', 'Fantasía', 'Drama', 'Misterio'];
 
@@ -23,6 +19,7 @@ function randomText(words) {
 
 async function seedDatabase() {
   try {
+    await mongoose.connect('mongodb://localhost:27017/bookreview');
 
     await Author.deleteMany({});
     await Book.deleteMany({});

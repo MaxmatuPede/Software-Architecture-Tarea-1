@@ -1,0 +1,7 @@
+<form action="/api/authors/<%= author._id %>?_method=PUT" method="post">
+  <label>Nombre: <input name="name" value="<%= author.name %>" required></label><br>
+  <label>Fecha de nacimiento: <input name="dateOfBirth" type="date" value="<%= author.dateOfBirth ? author.dateOfBirth.toISOString().slice(0,10) : '' %>"></label><br>
+  <label>País: <input name="countryOfOrigin" value="<%= author.countryOfOrigin %>"></label><br>
+  <label>Descripción: <textarea name="shortDescription"><%= author.shortDescription %></textarea></label><br>
+  <button type="submit">Actualizar autor</button>
+</form>

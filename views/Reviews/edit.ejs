@@ -1,0 +1,18 @@
+<h1>Editar Reseña</h1>
+<form action="/api/reviews/<%= review._id %>?_method=PUT" method="POST">
+  <label>Libro:</label>
+  <select name="book" required>
+    <option value="">-- Selecciona un libro --</option>
+    <% books.forEach(book => { %>
+      <option value="<%= book._id %>"><%= book.name %></option>
+    <% }) %>
+  </select><br>
+  
+  <label>Reseña:</label>
+  <textarea name="review"><%= review.review %></textarea><br>
+
+  <label>Puntuación (1-5):</label>
+  <input type="number" name="score" min="1" max="5" value="<%= review.score %>"><br>
+
+  <button type="submit">Actualizar</button>
+</form>

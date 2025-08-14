@@ -129,6 +129,9 @@
             <a href="/?model=sales" class="menu-item <%= model === 'sales' ? 'active' : '' %>">
                 💰 Ventas
             </a>
+            <a href="/reports" class="menu-item <%= model === 'reports' ? 'active' : '' %>">
+                📊 Tablas
+            </a>
         </div>
         
         <% if (model && data && data.length > 0) { %>
@@ -136,10 +139,13 @@
                 <h2 class="data-title"><%= title %> (Total: <%= data.length %>)</h2>
                 
                 <% if (model === 'authors') { %>
+                    <a href="/authors/new" class="back-btn">➕ Nuevo</a>
                     <div class="data-grid">
                         <% data.forEach(item => { %>
                             <div class="data-item">
                                 <button class="delete-btn" onclick="deleteItem('authors', '<%= item._id %>')">🗑️ Borrar</button>
+                                <button class="delete-btn" style="right: 60px; background:#ffc107" onclick="editItem('<%= model %>', '<%= item._id %>')">✏️</button>
+
                                 <h4><%= item.name %></h4>
                                 <p><strong>País:</strong> <%= item.countryOfOrigin %></p>
                                 <p><strong>Nacimiento:</strong> <%= new Date(item.dateOfBirth).toLocaleDateString() %></p>
@@ -148,10 +154,13 @@
                         <% }) %>
                     </div>
                 <% } else if (model === 'books') { %>
+                    <a href="/books/new" class="back-btn">➕ Nuevo</a>
                     <div class="data-grid">
                         <% data.forEach(item => { %>
                             <div class="data-item">
                                 <button class="delete-btn" onclick="deleteItem('books', '<%= item._id %>')">🗑️ Borrar</button>
+                                <button class="delete-btn" style="right: 60px; background:#ffc107" onclick="editItem('<%= model %>', '<%= item._id %>')">✏️</button>
+
                                 <h4><%= item.name %></h4>
                                 <p><strong>Autor:</strong> <%= item.author ? item.author.name : 'Sin autor' %></p>
                                 <p><strong>Publicación:</strong> <%= new Date(item.dateOfPublication).toLocaleDateString() %></p>
@@ -161,10 +170,13 @@
                         <% }) %>
                     </div>
                 <% } else if (model === 'reviews') { %>
+                    <a href="/reviews/new" class="back-btn" onclick="showForm('<%= model %>')">➕ Nuevo</a>
                     <div class="data-grid">
                         <% data.forEach(item => { %>
                             <div class="data-item">
                                 <button class="delete-btn" onclick="deleteItem('reviews', '<%= item._id %>')">🗑️ Borrar</button>
+                                <button class="delete-btn" style="right: 60px; background:#ffc107" onclick="editItem('<%= model %>', '<%= item._id %>')">✏️</button>
+
                                 <h4>Puntuación: <%= item.score %>/5 ⭐</h4>
                                 <p><strong>Libro:</strong> <%= item.book ? item.book.name : 'Sin libro' %></p>
                                 <p><strong>Upvotes:</strong> <%= item.upvotes %></p>
@@ -173,10 +185,13 @@
                         <% }) %>
                     </div>
                 <% } else if (model === 'sales') { %>
+                    <a href="/sales/new" class="back-btn" onclick="showForm('<%= model %>')">➕ Nuevo</a>
                     <div class="data-grid">
                         <% data.forEach(item => { %>
                             <div class="data-item">
                                 <button class="delete-btn" onclick="deleteItem('sales', '<%= item._id %>')">🗑️ Borrar</button>
+                                <button class="delete-btn" style="right: 60px; background:#ffc107" onclick="editItem('<%= model %>', '<%= item._id %>')">✏️</button>
+                                
                                 <h4>Año <%= item.year %></h4>
                                 <p><strong>Libro:</strong> <%= item.book ? item.book.name : 'Sin libro' %></p>
                                 <p><strong>Ventas:</strong> <%= item.sales.toLocaleString() %> unidades</p>
@@ -200,18 +215,17 @@
     <script>
         function deleteItem(model, id) {
             if (confirm('¿Estás seguro de que quieres eliminar este elemento? Se eliminarán también todos los datos relacionados.')) {
-                fetch(`/api/${model}/${id}`, {
-                    method: 'DELETE'
-                })
-                .then(response => response.json())
-                .then(data => {
-                    alert('Elemento eliminado correctamente');
-                    location.reload();
-                })
-                .catch(error => {
-                    alert('Error al eliminar: ' + error);
-                });
+                fetch(`/api/${model}/${id}`, { method: 'DELETE' })
+                    .then(res => {
+                        if (res.ok) location.reload();
+                        else return res.text().then(t => { throw new Error(t || 'Error al eliminar'); });
+                    })
+                    .catch(err => alert('Error: ' + err.message));
             }
+        }
+
+        function editItem(model, id) {
+            window.location.href = `/${model}/${id}/edit`;
         }
     </script>
 </body>

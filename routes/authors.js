@@ -15,7 +15,7 @@ router.post('/', async (req, res) => {
   try {
     const author = new Author(req.body);
     const savedAuthor = await author.save();
-    res.status(201).json(savedAuthor);
+    res.redirect('/?model=authors');
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -35,10 +35,16 @@ router.put('/:id', async (req, res) => {
   try {
     const author = await Author.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!author) return res.status(404).json({ message: 'Autor no encontrado' });
-    res.json(author);
+    res.redirect('/?model=authors');
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
+});
+
+router.get('/:id/edit', async (req, res) => {
+  const author = await Author.findById(req.params.id);
+  if (!author) return res.status(404).send('Autor no encontrado');
+  res.render('Authors/edit', { author });
 });
 
 router.delete('/:id', async (req, res) => {

@@ -1,0 +1,29 @@
+<h1>Top 10 Libros Mejor Valorados</h1>
+<table id="topRatedTable" class="display">
+  <thead>
+    <tr>
+      <th>Libro</th>
+      <th>Puntaje promedio</th>
+      <th>Reseña más alta</th>
+      <th>Reseña más baja</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% books.forEach(b => { %>
+      <tr>
+        <td><%= b.name %></td>
+        <td><%= b.averageScore ? b.averageScore.toFixed(2) : '-' %></td>
+        <td><%= b.highestReview || '-' %></td>
+        <td><%= b.lowestReview || '-' %></td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" />
+<script>
+$(document).ready(function() {
+  $('#topRatedTable').DataTable();
+});
+</script>

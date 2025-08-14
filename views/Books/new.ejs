@@ -1,0 +1,21 @@
+<h1>Nuevo Libro</h1>
+<form action="/api/books" method="POST">
+  <label>Nombre:</label>
+  <input name="name" required><br>
+
+  <label>Resumen:</label>
+  <textarea name="summary"></textarea><br>
+
+  <label>Fecha de publicación:</label>
+  <input type="date" name="dateOfPublication"><br>
+
+  <label>Autor:</label>
+  <select name="author" required>
+    <option value="">-- Selecciona un autor --</option>
+    <% authors.forEach(author => { %>
+      <option value="<%= author._id %>"><%= author.name %></option>
+    <% }) %>
+  </select><br>
+
+  <button type="submit">Guardar</button>
+</form>

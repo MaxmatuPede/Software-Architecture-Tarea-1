@@ -1,0 +1,21 @@
+<h1>Editar Libro</h1>
+<form action="/api/books/<%= book._id %>?_method=PUT" method="POST">
+  <label>Nombre:</label>
+  <input name="name" value="<%= book.name %>" required><br>
+
+  <label>Resumen:</label>
+  <textarea name="summary"><%= book.summary %></textarea><br>
+
+  <label>Fecha de publicación:</label>
+  <input type="date" name="dateOfPublication" value="<%= book.dateOfPublication ? new Date(book.dateOfPublication).toISOString().split('T')[0] : '' %>"><br>
+
+  <label>Autor:</label>
+  <select name="author" required>
+    <option value="">-- Selecciona un autor --</option>
+    <% authors.forEach(author => { %>
+      <option value="<%= author._id %>"><%= author.name %></option>
+    <% }) %>
+  </select><br>
+
+  <button type="submit">Actualizar</button>
+</form>

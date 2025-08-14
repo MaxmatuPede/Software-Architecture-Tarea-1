@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 Reports - Book Review App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .reports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .report-card {
+            background: #007bff;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: background 0.3s;
+        }
+        .report-card:hover {
+            background: #0056b3;
+        }
+        .report-card h3 {
+            margin-top: 0;
+        }
+        .report-card p {
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 15px;
+            background: #6c757d;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .back-btn:hover {
+            background: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-btn">⬅ Volver al inicio</a>
+        <h1>📊 Tablas</h1>
+        <div class="reports-grid">
+            <a href="/reports/authors" class="report-card">
+                <h3>👤 Autores - Ventas y Promedio</h3>
+                <p>Muestra autores con número de libros, promedio de puntuación y ventas totales. Incluye filtros y ordenamiento.</p>
+            </a>
+            <a href="/reports/top-rated" class="report-card">
+                <h3>⭐ Top 10 Libros Mejor Valorados</h3>
+                <p>Lista de los 10 libros con mejor puntuación y sus reseñas más populares y menos populares.</p>
+            </a>
+            <a href="/reports/top-selling" class="report-card">
+                <h3>💰 Top 50 Libros Más Vendidos</h3>
+                <p>Incluye ventas totales, ventas del autor y si estuvo en el top 5 de su año.</p>
+            </a>
+            <a href="/reports/search" class="report-card">
+                <h3>🔍 Búsqueda en Descripciones</h3>
+                <p>Permite buscar libros por palabras clave en su descripción, con paginación de resultados.</p>
+            </a>
+        </div>
+    </div>
+</body>
+</html>

@@ -16,7 +16,7 @@ router.post('/', async (req, res) => {
     const sale = new Sales(req.body);
     const savedSale = await sale.save();
     const populatedSale = await Sales.findById(savedSale._id).populate('book');
-    res.status(201).json(populatedSale);
+    res.redirect('/?model=sales');
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -36,7 +36,7 @@ router.put('/:id', async (req, res) => {
   try {
     const sale = await Sales.findByIdAndUpdate(req.params.id, req.body, { new: true }).populate('book');
     if (!sale) return res.status(404).json({ message: 'Registro de ventas no encontrado' });
-    res.json(sale);
+    res.redirect('/?model=sales');
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

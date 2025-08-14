@@ -18,7 +18,7 @@ router.post('/', async (req, res) => {
     const review = new Review(req.body);
     const savedReview = await review.save();
     const populatedReview = await Review.findById(savedReview._id).populate('book');
-    res.status(201).json(populatedReview);
+    res.redirect('/?model=reviews');
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -39,7 +39,7 @@ router.put('/:id', async (req, res) => {
   try {
     const review = await Review.findByIdAndUpdate(req.params.id, req.body, { new: true }).populate('book');
     if (!review) return res.status(404).json({ message: 'Reseña no encontrada' });
-    res.json(review);
+    res.redirect('/?model=reviews');
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

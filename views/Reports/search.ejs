@@ -1,0 +1,24 @@
+<h1>Buscar Libros</h1>
+<form method="GET" action="/reports/search">
+  <input type="text" name="q" value="<%= q %>" placeholder="Buscar en descripción...">
+  <button type="submit">Buscar</button>
+</form>
+
+<p>Mostrando página <%= page %> de <%= Math.ceil(total / 10) %></p>
+
+<ul>
+  <% books.forEach(book => { %>
+    <li>
+      <strong><%= book.name %></strong> — <%= book.summary %>
+    </li>
+  <% }) %>
+</ul>
+
+<div>
+  <% if (page > 1) { %>
+    <a href="/reports/search?q=<%= q %>&page=<%= page - 1 %>">Anterior</a>
+  <% } %>
+  <% if (page < Math.ceil(total / 10)) { %>
+    <a href="/reports/search?q=<%= q %>&page=<%= page + 1 %>">Siguiente</a>
+  <% } %>
+</div>

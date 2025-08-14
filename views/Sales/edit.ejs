@@ -1,0 +1,18 @@
+<h1>Editar Venta</h1>
+<form action="/api/sales/<%= sale._id %>?_method=PUT" method="POST">
+  <label>Libro:</label>
+  <select name="book" required>
+    <option value="">-- Selecciona un libro --</option>
+    <% books.forEach(book => { %>
+      <option value="<%= book._id %>"><%= book.name %></option>
+    <% }) %>
+  </select><br>
+  
+  <label>Año:</label>
+  <input type="number" name="year" value="<%= sale.year %>"><br>
+
+  <label>Ventas:</label>
+  <input type="number" name="sales" value="<%= sale.sales %>"><br>
+
+  <button type="submit">Actualizar</button>
+</form>
