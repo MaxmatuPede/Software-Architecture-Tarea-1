@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Review App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .menu-item {
+            background: #007bff;
+            color: white;
+            padding: 15px;
+            text-decoration: none;
+            border-radius: 8px;
+            text-align: center;
+            transition: background-color 0.3s;
+            display: block;
+        }
+        .menu-item:hover {
+            background: #0056b3;
+        }
+        .menu-item.active {
+            background: #28a745;
+        }
+        .data-section {
+            margin-top: 30px;
+        }
+        .data-title {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .data-grid {
+            display: grid;
+            gap: 15px;
+        }
+        .data-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+            position: relative;
+        }
+        .data-item h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        .data-item p {
+            margin: 5px 0;
+            color: #666;
+            font-size: 14px;
+        }
+        .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .delete-btn:hover {
+            background: #c82333;
+        }
+        .back-btn {
+            background: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        .back-btn:hover {
+            background: #5a6268;
+        }
+        .description {
+            text-align: center;
+            color: #666;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 Book Review App</h1>
+        
+        <% if (!model) { %>
+            <p class="description">Selecciona qué datos quieres ver:</p>
+        <% } %>
+        
+        <div class="menu">
+            <a href="/?model=authors" class="menu-item <%= model === 'authors' ? 'active' : '' %>">
+                👤 Autores
+            </a>
+            <a href="/?model=books" class="menu-item <%= model === 'books' ? 'active' : '' %>">
+                📖 Libros
+            </a>
+            <a href="/?model=reviews" class="menu-item <%= model === 'reviews' ? 'active' : '' %>">
+                ⭐ Reseñas
+            </a>
+            <a href="/?model=sales" class="menu-item <%= model === 'sales' ? 'active' : '' %>">
+                💰 Ventas
+            </a>
+        </div>
+        
+        <% if (model && data && data.length > 0) { %>
+            <div class="data-section">
+                <h2 class="data-title"><%= title %> (Total: <%= data.length %>)</h2>
+                
+                <% if (model === 'authors') { %>
+                    <div class="data-grid">
+                        <% data.forEach(item => { %>
+                            <div class="data-item">
+                                <button class="delete-btn" onclick="deleteItem('authors', '<%= item._id %>')">🗑️ Borrar</button>
+                                <h4><%= item.name %></h4>
+                                <p><strong>País:</strong> <%= item.countryOfOrigin %></p>
+                                <p><strong>Nacimiento:</strong> <%= new Date(item.dateOfBirth).toLocaleDateString() %></p>
+                                <p><strong>Descripción:</strong> <%= item.shortDescription %></p>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } else if (model === 'books') { %>
+                    <div class="data-grid">
+                        <% data.forEach(item => { %>
+                            <div class="data-item">
+                                <button class="delete-btn" onclick="deleteItem('books', '<%= item._id %>')">🗑️ Borrar</button>
+                                <h4><%= item.name %></h4>
+                                <p><strong>Autor:</strong> <%= item.author ? item.author.name : 'Sin autor' %></p>
+                                <p><strong>Publicación:</strong> <%= new Date(item.dateOfPublication).toLocaleDateString() %></p>
+                                <p><strong>Ventas Totales:</strong> <%= item.totalSales ? item.totalSales.toLocaleString() : '0' %> unidades</p>
+                                <p><strong>Resumen:</strong> <%= item.summary.substring(0, 100) %>...</p>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } else if (model === 'reviews') { %>
+                    <div class="data-grid">
+                        <% data.forEach(item => { %>
+                            <div class="data-item">
+                                <button class="delete-btn" onclick="deleteItem('reviews', '<%= item._id %>')">🗑️ Borrar</button>
+                                <h4>Puntuación: <%= item.score %>/5 ⭐</h4>
+                                <p><strong>Libro:</strong> <%= item.book ? item.book.name : 'Sin libro' %></p>
+                                <p><strong>Upvotes:</strong> <%= item.upvotes %></p>
+                                <p><strong>Reseña:</strong> <%= item.review.substring(0, 150) %>...</p>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } else if (model === 'sales') { %>
+                    <div class="data-grid">
+                        <% data.forEach(item => { %>
+                            <div class="data-item">
+                                <button class="delete-btn" onclick="deleteItem('sales', '<%= item._id %>')">🗑️ Borrar</button>
+                                <h4>Año <%= item.year %></h4>
+                                <p><strong>Libro:</strong> <%= item.book ? item.book.name : 'Sin libro' %></p>
+                                <p><strong>Ventas:</strong> <%= item.sales.toLocaleString() %> unidades</p>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } %>
+            </div>
+        <% } else if (model && data && data.length === 0) { %>
+            <div class="data-section">
+                <h2 class="data-title">No hay datos de <%= title %></h2>
+                <p>No se encontraron registros.</p>
+            </div>
+        <% } else { %>
+            <div class="description">
+                <p>Datos generados: 50 autores, 300 libros, múltiples reseñas y ventas por año</p>
+            </div>
+        <% } %>
+    </div>
+
+    <script>
+        function deleteItem(model, id) {
+            if (confirm('¿Estás seguro de que quieres eliminar este elemento? Se eliminarán también todos los datos relacionados.')) {
+                fetch(`/api/${model}/${id}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert('Elemento eliminado correctamente');
+                    location.reload();
+                })
+                .catch(error => {
+                    alert('Error al eliminar: ' + error);
+                });
+            }
+        }
+    </script>
+</body>
+</html>
