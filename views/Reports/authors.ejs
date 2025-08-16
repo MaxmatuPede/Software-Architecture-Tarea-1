@@ -1,46 +1,140 @@
-<h1>Autores</h1>
-<table id="authorsTable" class="display" style="width:100%">
-  <thead>
-    <tr>
-      <th>Nombre</th>
-      <th># Libros</th>
-      <th>Puntaje promedio</th>
-      <th>Ventas totales</th>
-    </tr>
-    <tr>
-      <th><input type="text" placeholder="Filtrar nombre" style="width:100%"></th>
-      <th><input type="number" placeholder="Filtrar #" style="width:100%"></th>
-      <th><input type="number" placeholder="Filtrar puntaje" style="width:100%"></th>
-      <th><input type="number" placeholder="Filtrar ventas" style="width:100%"></th>
-    </tr>
-  </thead>
-  <tbody>
-    <% authors.forEach(a => { %>
-      <tr>
-        <td><%= a.name %></td>
-        <td><%= a.numberOfBooks || 0 %></td>
-        <td><%= a.averageScore ? a.averageScore.toFixed(2) : '-' %></td>
-        <td><%= a.totalSales ? a.totalSales.toLocaleString() : '0' %></td>
-      </tr>
-    <% }) %>
-  </tbody>
-</table>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Autores y Estadísticas</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" />
+    <style>
+        body {
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+        }
+        .table-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .column-filter {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-top: 5px;
+        }
+        .books-badge {
+            background: #e3f2fd;
+            color: #1565c0;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.9em;
+        }
+        .rating {
+            color: #ffd700;
+            font-size: 0.9em;
+        }
+        .rating .score {
+            color: #666;
+            margin-left: 5px;
+        }
+        .no-rating {
+            color: #999;
+            font-style: italic;
+        }
+        table.dataTable thead th {
+            background: #f8f9fa;
+            padding: 12px;
+        }
+        table.dataTable tbody td {
+            padding: 12px;
+            vertical-align: middle;
+        }
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 15px;
+            background: #6c757d;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .back-btn:hover {
+            background: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <a href="/reports" class="back-btn">⬅ Volver a Reports</a>
+    <h1>👥 Autores y Estadísticas</h1>
+    <div class="table-container">
+        <table id="authorsTable" class="display" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th># Libros</th>
+                    <th>Puntaje promedio</th>
+                    <th>Ventas totales</th>
+                </tr>
+                <tr>
+                    <th><input type="text" placeholder="Filtrar nombre" class="column-filter"></th>
+                    <th><input type="number" placeholder="Filtrar #" class="column-filter"></th>
+                    <th><input type="number" placeholder="Filtrar puntaje" class="column-filter"></th>
+                    <th><input type="number" placeholder="Filtrar ventas" class="column-filter"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <% authors.forEach(a => { %>
+                    <tr>
+                        <td><%= a.name %></td>
+                        <td>
+                            <span class="books-badge">
+                                <%= a.numberOfBooks || 0 %>
+                            </span>
+                        </td>
+                        <td>
+                            <% if (a.averageScore) { %>
+                                <div class="rating">
+                                    <%= "⭐".repeat(Math.round(a.averageScore)) %>
+                                    <span class="score">(<%= a.averageScore.toFixed(2) %>)</span>
+                                </div>
+                            <% } else { %>
+                                <span class="no-rating">Sin calificaciones</span>
+                            <% } %>
+                        </td>
+                        <td><%= a.totalSales ? a.totalSales.toLocaleString('es-ES') : '0' %></td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
 
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" />
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-<script>
-$(document).ready(function() {
-  var table = $('#authorsTable').DataTable({
-    orderCellsTop: true,
-    fixedHeader: true
-  });
-  $('#authorsTable thead tr:eq(1) th').each(function(i) {
-    $('input', this).on('keyup change', function() {
-      if (table.column(i).search() !== this.value) {
-        table.column(i).search(this.value).draw();
-      }
-    });
-  });
-});
-</script>
+    <script>
+        $(document).ready(function() {
+            var table = $('#authorsTable').DataTable({
+                orderCellsTop: true,
+                fixedHeader: true,
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+                },
+                order: [[3, 'desc']] // Ordenar por ventas por defecto
+            });
+            
+            $('#authorsTable thead tr:eq(1) th').each(function(i) {
+                $('input', this).on('keyup change', function() {
+                    if (table.column(i).search() !== this.value) {
+                        table.column(i).search(this.value).draw();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

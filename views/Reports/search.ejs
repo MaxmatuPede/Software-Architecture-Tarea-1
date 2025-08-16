@@ -1,24 +1,150 @@
-<h1>Buscar Libros</h1>
-<form method="GET" action="/reports/search">
-  <input type="text" name="q" value="<%= q %>" placeholder="Buscar en descripción...">
-  <button type="submit">Buscar</button>
-</form>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Buscar Libros</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .search-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .search-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .search-form input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .search-button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .search-button:hover {
+            background: #0056b3;
+        }
+        .results-info {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .books-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .book-item {
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: white;
+        }
+        .book-item h3 {
+            margin: 0 0 10px 0;
+            color: #007bff;
+        }
+        .book-date {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .page-btn {
+            padding: 8px 16px;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #007bff;
+        }
+        .page-btn:hover {
+            background: #e9ecef;
+        }
+        .no-results {
+            text-align: center;
+            color: #666;
+            padding: 20px;
+        }
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 15px;
+            background: #6c757d;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .back-btn:hover {
+            background: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="search-container">
+        <a href="/reports" class="back-btn">⬅ Volver a Reports</a>
+        <h1>🔍 Buscar Libros</h1>
+        
+        <form method="GET" action="/reports/search" class="search-form">
+            <input type="text" name="q" value="<%= q %>" placeholder="Buscar en descripción..." required>
+            <button type="submit" class="search-button">Buscar</button>
+        </form>
 
-<p>Mostrando página <%= page %> de <%= Math.ceil(total / 10) %></p>
+        <% if (total > 0) { %>
+            <p class="results-info">Mostrando página <%= page %> de <%= Math.ceil(total / 10) %> (Total: <%= total %> resultados)</p>
 
-<ul>
-  <% books.forEach(book => { %>
-    <li>
-      <strong><%= book.name %></strong> — <%= book.summary %>
-    </li>
-  <% }) %>
-</ul>
+            <div class="books-list">
+                <% books.forEach(book => { %>
+                    <div class="book-item">
+                        <h3><%= book.name %></h3>
+                        <p><%= book.summary %></p>
+                        <% if (book.dateOfPublication) { %>
+                            <p class="book-date">Publicado: <%= new Date(book.dateOfPublication).toLocaleDateString('es-ES', { 
+                                year: 'numeric', 
+                                month: 'long', 
+                                day: 'numeric' 
+                            }) %></p>
+                        <% } %>
+                    </div>
+                <% }) %>
+            </div>
 
-<div>
-  <% if (page > 1) { %>
-    <a href="/reports/search?q=<%= q %>&page=<%= page - 1 %>">Anterior</a>
-  <% } %>
-  <% if (page < Math.ceil(total / 10)) { %>
-    <a href="/reports/search?q=<%= q %>&page=<%= page + 1 %>">Siguiente</a>
-  <% } %>
-</div>
+            <div class="pagination">
+                <% if (page > 1) { %>
+                    <a href="/reports/search?q=<%= q %>&page=<%= page - 1 %>" class="page-btn">← Anterior</a>
+                <% } %>
+                <% if (page < Math.ceil(total / 10)) { %>
+                    <a href="/reports/search?q=<%= q %>&page=<%= page + 1 %>" class="page-btn">Siguiente →</a>
+                <% } %>
+            </div>
+        <% } else if (q) { %>
+            <p class="no-results">No se encontraron resultados para "<%= q %>"</p>
+        <% } %>
+    </div>
+</body>
+</html>

@@ -148,7 +148,7 @@
 
                                 <h4><%= item.name %></h4>
                                 <p><strong>País:</strong> <%= item.countryOfOrigin %></p>
-                                <p><strong>Nacimiento:</strong> <%= new Date(item.dateOfBirth).toLocaleDateString() %></p>
+                                <p><strong>Nacimiento:</strong> <%= new Date(new Date(item.dateOfBirth).getTime() + (new Date(item.dateOfBirth).getTimezoneOffset() * 60000)).toLocaleDateString() %></p>
                                 <p><strong>Descripción:</strong> <%= item.shortDescription %></p>
                             </div>
                         <% }) %>
@@ -163,7 +163,7 @@
 
                                 <h4><%= item.name %></h4>
                                 <p><strong>Autor:</strong> <%= item.author ? item.author.name : 'Sin autor' %></p>
-                                <p><strong>Publicación:</strong> <%= new Date(item.dateOfPublication).toLocaleDateString() %></p>
+                                <p><strong>Publicación:</strong> <%= new Date(new Date(item.dateOfPublication).getTime() + (new Date(item.dateOfPublication).getTimezoneOffset() * 60000)).toLocaleDateString() %></p>
                                 <p><strong>Ventas Totales:</strong> <%= item.totalSales ? item.totalSales.toLocaleString() : '0' %> unidades</p>
                                 <p><strong>Resumen:</strong> <%= item.summary.substring(0, 100) %>...</p>
                             </div>

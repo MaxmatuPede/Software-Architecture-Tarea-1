@@ -1,29 +1,112 @@
-<h1>Top 50 Libros Más Vendidos</h1>
-<table id="topSellingTable" class="display">
-  <thead>
-    <tr>
-      <th>Libro</th>
-      <th>Ventas totales</th>
-      <th>Autor</th>
-      <th>Top 5 en año de publicación</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% books.forEach(b => { %>
-      <tr>
-        <td><%= b.name %></td>
-        <td><%= b.totalSales ? b.totalSales.toLocaleString() : '0' %></td>
-        <td><%= b.authorName || 'Desconocido' %></td>
-        <td><%= b.wasTop5 ? 'Sí' : 'No' %></td>
-      </tr>
-    <% }) %>
-  </tbody>
-</table>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Top 50 Libros Más Vendidos</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" />
+    <style>
+        body {
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .dataTables_wrapper {
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        table.dataTable thead th {
+            background-color: #f8f9fa;
+            padding: 12px;
+        }
+        table.dataTable tbody td {
+            padding: 12px;
+        }
+        .top5-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        .top5-badge.yes {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .top5-badge.no {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .dataTables_info, .dataTables_paginate {
+            margin-top: 15px;
+        }
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 15px;
+            background: #6c757d;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .back-btn:hover {
+            background: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <a href="/reports" class="back-btn">⬅ Volver a Reports</a>
+    <h1>💰 Top 50 Libros Más Vendidos</h1>
+    <table id="topSellingTable" class="display">
+        <thead>
+            <tr>
+                <th>Libro</th>
+                <th>Ventas totales</th>
+                <th>Autor</th>
+                <th>Fecha de publicación</th>
+                <th>Top 5 en su año</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% books.forEach(b => { %>
+                <tr>
+                    <td><%= b.name %></td>
+                    <td><%= b.totalSales ? b.totalSales.toLocaleString('es-ES') : '0' %></td>
+                    <td><%= b.authorName || 'Desconocido' %></td>
+                    <td><%= b.dateOfPublication ? new Date(new Date(b.dateOfPublication).getTime() + (new Date(b.dateOfPublication).getTimezoneOffset() * 60000)).toLocaleDateString('es-ES', { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                    }) : '-' %></td>
+                    <td>
+                        <span class="top5-badge <%= b.wasTop5 ? 'yes' : 'no' %>">
+                            <%= b.wasTop5 ? '✅ Sí' : '❌ No' %>
+                        </span>
+                    </td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
 
-<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" />
-<script>
-$(document).ready(function() {
-  $('#topSellingTable').DataTable();
-});
+    <script>
+        $(document).ready(function() {
+            $('#topSellingTable').DataTable({
+                order: [[1, 'desc']], // Ordenar por ventas totales por defecto
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+                },
+                columnDefs: [
+                    { targets: 1, render: $.fn.dataTable.render.number(',', '.', 0, '') }
+                ]
+            });
+        });
+    </script>
+</body>
+</html>
 </script>
