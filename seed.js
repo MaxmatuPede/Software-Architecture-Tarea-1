@@ -19,7 +19,7 @@ function randomText(words) {
 
 async function seedDatabase() {
   try {
-    await mongoose.connect('mongodb://localhost:27017/bookreview');
+    await mongoose.connect('mongodb://mongodb:27017/bookreview');
 
     await Author.deleteMany({});
     await Book.deleteMany({});

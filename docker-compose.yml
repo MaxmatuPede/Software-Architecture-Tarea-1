@@ -1,0 +1,30 @@
+services:
+  app:
+    build: .
+    container_name: app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongodb
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+
+  mongodb:
+    image: mongo:6
+    container_name: db
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  seed:
+    build: .
+    command: ["node", "seed.js"]
+    depends_on:
+      - app
+      - mongodb
+
+volumes:
+  mongo_data:

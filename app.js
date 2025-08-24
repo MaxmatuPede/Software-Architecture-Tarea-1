@@ -16,7 +16,7 @@ app.use(methodOverride('_method'));
 
 // Base de datos
 
-mongoose.connect('mongodb://localhost:27017/bookreview');
+mongoose.connect('mongodb://mongodb:27017/bookreview');
 
 mongoose.connection.on('connected', () => {
   console.log('✅ Conectado a MongoDB');
