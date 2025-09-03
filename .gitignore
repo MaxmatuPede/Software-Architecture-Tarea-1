@@ -1,0 +1,63 @@
+# .gitignore generico
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+yarn.lock
+.pnpm-debug.log
+
+# Logs
+logs
+*.log
+*.log.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# dotenv environment variables
+.env
+.env.test
+.env.local
+.env.*.local
+
+# Coverage and build
+coverage/
+.nyc_output/
+dist/
+build/
+tmp/
+.cache/
+*.tsbuildinfo
+
+# Docker
+.docker/
+docker-compose.override.yml
+docker-compose.local.yml
+*.dockerfile
+
+# Redis (if persisting locally)
+dump.rdb
+appendonly.aof
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE/editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+*.swm
+*.sublime-project
+*.sublime-workspace

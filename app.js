@@ -4,11 +4,17 @@ const methodOverride = require('method-override');
 const app = express();
 const port = 3000;
 
+const { getAllAuthors } = require('./routes/services/authorCache');
+const { getAllBooks } = require('./routes/services/bookCache');
+const { getAllReviews } = require('./routes/services/reviewCache');
+const { getAllSales } = require('./routes/services/salesCache');
 
 const Author = require('./models/Author');
 const Book = require('./models/Book');
 const Review = require('./models/Review');
 const Sales = require('./models/Sales');
+
+require('./cache');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -42,19 +48,19 @@ app.get('/', async (req, res) => {
     if (model) {
       switch(model) {
         case 'authors':
-          data = await Author.find();
+          data = await getAllAuthors();
           title = 'Autores';
           break;
         case 'books':
-          data = await Book.findWithTotalSales();
+          data = await getAllBooks();
           title = 'Libros';
           break;
         case 'reviews':
-          data = await Review.find().populate('book');
+          data = await getAllReviews();
           title = 'Reseñas';
           break;
         case 'sales':
-          data = await Sales.find().populate('book');
+          data = await getAllSales();
           title = 'Ventas';
           break;
       }
