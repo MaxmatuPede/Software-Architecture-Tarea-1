@@ -16,6 +16,10 @@ const authorSchema = new mongoose.Schema({
   shortDescription: {
     type: String,
     required: true
+  },
+  photoPath: {
+    type: String,
+    default: null
   }
 }, {
   timestamps: true

@@ -145,7 +145,7 @@
                             <div class="data-item">
                                 <button class="delete-btn" onclick="deleteItem('authors', '<%= item._id %>')">🗑️ Borrar</button>
                                 <button class="delete-btn" style="right: 60px; background:#ffc107" onclick="editItem('<%= model %>', '<%= item._id %>')">✏️</button>
-
+                                <button class="delete-btn" style="right: 110px; background:#17a2b8" onclick="showItem('<%= model %>', '<%= item._id %>')">👁️ Ver</button>
                                 <h4><%= item.name %></h4>
                                 <p><strong>País:</strong> <%= item.countryOfOrigin %></p>
                                 <p><strong>Nacimiento:</strong> <%= new Date(new Date(item.dateOfBirth).getTime() + (new Date(item.dateOfBirth).getTimezoneOffset() * 60000)).toLocaleDateString() %></p>
@@ -160,7 +160,7 @@
                             <div class="data-item">
                                 <button class="delete-btn" onclick="deleteItem('books', '<%= item._id %>')">🗑️ Borrar</button>
                                 <button class="delete-btn" style="right: 60px; background:#ffc107" onclick="editItem('<%= model %>', '<%= item._id %>')">✏️</button>
-
+                                <button class="delete-btn" style="right: 110px; background:#17a2b8" onclick="showItem('<%= model %>', '<%= item._id %>')">👁️ Ver</button>
                                 <h4><%= item.name %></h4>
                                 <p><strong>Autor:</strong> <%= item.author ? item.author.name : 'Sin autor' %></p>
                                 <p><strong>Publicación:</strong> <%= new Date(new Date(item.dateOfPublication).getTime() + (new Date(item.dateOfPublication).getTimezoneOffset() * 60000)).toLocaleDateString() %></p>
@@ -176,7 +176,6 @@
                             <div class="data-item">
                                 <button class="delete-btn" onclick="deleteItem('reviews', '<%= item._id %>')">🗑️ Borrar</button>
                                 <button class="delete-btn" style="right: 60px; background:#ffc107" onclick="editItem('<%= model %>', '<%= item._id %>')">✏️</button>
-
                                 <h4>Puntuación: <%= item.score %>/5 ⭐</h4>
                                 <p><strong>Libro:</strong> <%= item.book ? item.book.name : 'Sin libro' %></p>
                                 <p><strong>Upvotes:</strong> <%= item.upvotes %></p>
@@ -226,6 +225,10 @@
 
         function editItem(model, id) {
             window.location.href = `/${model}/${id}/edit`;
+        }
+
+        function showItem(model, id) {
+            window.location.href = `/${model}/${id}`;
         }
     </script>
 </body>

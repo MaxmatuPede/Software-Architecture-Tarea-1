@@ -1,5 +1,6 @@
 <h1>Editar Libro</h1>
-<form action="/api/books/<%= book._id %>?_method=PUT" method="POST">
+
+<form action="/api/books/<%= book._id %>?_method=PUT" method="POST" enctype="multipart/form-data">
   <label>Nombre:</label>
   <input name="name" value="<%= book.name %>" required><br>
 
@@ -7,14 +8,46 @@
   <textarea name="summary"><%= book.summary %></textarea><br>
 
   <label>Fecha de publicación:</label>
-  <input type="date" name="dateOfPublication" value="<%= book.dateOfPublication ? new Date(book.dateOfPublication).toISOString().split('T')[0] : '' %>"><br>
+  <input type="date" name="dateOfPublication"
+         value="<%= book.dateOfPublication ? new Date(book.dateOfPublication).toISOString().split('T')[0] : '' %>"><br>
 
   <label>Autor:</label>
   <select name="author" required>
     <% authors.forEach(author => { %>
-      <option value="<%= author._id %>" <%= author._id.toString() === book.author.toString() ? 'selected' : '' %>><%= author.name %></option>
+      <option value="<%= author._id %>"
+        <%= (book.author && book.author._id
+              ? author._id.toString() === book.author._id.toString()
+              : author._id.toString() === book.author.toString())
+            ? 'selected'
+            : '' %>>
+        <%= author.name %>
+      </option>
     <% }) %>
   </select><br>
 
-  <button type="submit">Actualizar</button>
+  <fieldset style="margin-top:1rem;">
+    <legend>Portada del libro</legend>
+
+    <% if (book.coverUrl) { %>
+      <div style="margin-bottom:.5rem;">
+        <strong>Actual:</strong><br>
+        <img src="<%= book.coverUrl %>" alt="Portada del libro"
+             style="max-width:160px; height:auto; border:1px solid #ddd; padding:4px; border-radius:6px;">
+      </div>
+
+      <label style="display:block; margin:.5rem 0;">
+        <input type="checkbox" name="removeCover" value="1">
+        Eliminar portada actual
+      </label>
+    <% } %>
+
+    <label style="display:block; margin-top:.5rem;">
+      Subir nueva portada (opcional):
+      <input type="file" name="cover" accept="image/*">
+    </label>
+
+    <input type="hidden" name="existingCoverPath" value="<%= book.coverUrl || '' %>">
+  </fieldset>
+
+  <button type="submit" style="margin-top:1rem;">Actualizar</button>
 </form>

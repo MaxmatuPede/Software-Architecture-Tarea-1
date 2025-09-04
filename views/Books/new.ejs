@@ -1,5 +1,6 @@
 <h1>Nuevo Libro</h1>
-<form action="/api/books" method="POST">
+
+<form action="/api/books" method="POST" enctype="multipart/form-data">
   <label>Nombre:</label>
   <input name="name" required><br>
 
@@ -17,5 +18,10 @@
     <% }) %>
   </select><br>
 
-  <button type="submit">Guardar</button>
+  <fieldset style="margin-top:1rem;">
+    <legend>Portada del libro</legend>
+    <input type="file" name="cover" accept="image/*">
+  </fieldset>
+
+  <button type="submit" style="margin-top:1rem;">Guardar</button>
 </form>

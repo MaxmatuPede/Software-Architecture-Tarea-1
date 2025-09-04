@@ -1,76 +1,86 @@
+// routes/books.js
 const express = require('express');
+const path = require('path');
+const fs = require('fs');
+const multer = require('multer');
+
 const router = express.Router();
 const Book = require('../models/Book');
-const Sales = require('../models/Sales');
-const { getAllBooks, purgeBooksCache } = require('./services/bookCache');
+const buildPublicUrl = require('../utils/publicUrl');
 
-// GET ALL
+const BOOKS_DIR = path.join(__dirname, '..', 'public', 'uploads', 'books');
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, BOOKS_DIR),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`);
+  }
+});
+const fileFilter = (req, file, cb) => cb(null, /^image\//.test(file.mimetype));
+const upload = multer({ storage, fileFilter, limits: { fileSize: 5 * 1024 * 1024 } });
+
+async function removeFileIfExists(relativePath) {
+  if (!relativePath) return;
+  const full = path.join(__dirname, '..', 'public', 'uploads', relativePath);
+  try { await fs.promises.unlink(full); } catch (_) {}
+}
+
+// LIST
 router.get('/', async (req, res) => {
-  try {
-    const booksWithSales = await getAllBooks();
-    res.json(booksWithSales);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+  const books = await Book.find().populate('author');
+  const enriched = books.map(b => ({
+    ...b.toObject(),
+    coverUrl: b.coverUrl ? buildPublicUrl(req, b.coverUrl) : null
+  }));
+  res.json(enriched);
 });
 
-// CREATE
-router.post('/', async (req, res) => {
+// CREATE (new)
+router.post('/', upload.single('cover'), async (req, res) => {
   try {
-    const book = new Book(req.body);
-    const savedBook = await book.save();
-    await purgeBooksCache();
+    const body = { ...req.body };
+    if (req.file) body.coverUrl = path.posix.join('books', req.file.filename);
+
+    const saved = await new Book(body).save();
     res.redirect('/?model=books');
-  } catch (error) {
-    res.status(400).json({ message: error.message });
+  } catch (e) {
+    res.status(400).json({ message: e.message });
   }
 });
 
-// GET ID
-router.get('/:id', async (req, res) => {
+// UPDATE (edit)
+router.put('/:id', upload.single('cover'), async (req, res) => {
   try {
-    const book = await Book.findById(req.params.id).populate('author');
-    if (!book) return res.status(404).json({ message: 'Libro no encontrado' });
+    const current = await Book.findById(req.params.id);
+    if (!current) return res.status(404).json({ message: 'Libro no encontrado' });
 
-    const sales = await Sales.find({ book: book._id });
-    const totalSales = sales.reduce((sum, sale) => sum + sale.sales, 0);
+    const wantsRemove = req.body.removeCover === '1' || req.body.removeCover === 'on';
 
-    res.json({ ...book.toObject(), totalSales });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
+    const updateDoc = {};
+    updateDoc.$set = { ...req.body };
 
-// UPDATE 
-router.put('/:id', async (req, res) => {
-  try {
-    const book = await Book.findByIdAndUpdate(req.params.id, req.body, { new: true }).populate('author');
-    if (!book) return res.status(404).json({ message: 'Libro no encontrado' });
+    if (wantsRemove) {
+      await removeFileIfExists(current.coverUrl);
+      updateDoc.$unset = { coverUrl: 1 };
+    }
 
-    await purgeBooksCache();
+    if (req.file) {
+      await removeFileIfExists(current.coverUrl);
+      updateDoc.$set.coverUrl = path.posix.join('books', req.file.filename);
+      if (updateDoc.$unset) delete updateDoc.$unset.coverUrl;
+    }
+
+    await Book.findByIdAndUpdate(req.params.id, updateDoc, {
+      new: true,
+      runValidators: true
+    });
+
     res.redirect('/?model=books');
-  } catch (error) {
-    res.status(400).json({ message: error.message });
+  } catch (e) {
+    res.status(400).json({ message: e.message });
   }
 });
 
-// DELETE 
-router.delete('/:id', async (req, res) => {
-  try {
-    const book = await Book.findById(req.params.id);
-    if (!book) return res.status(404).json({ message: 'Libro no encontrado' });
 
-    const Review = require('../models/Review');
-    await Review.deleteMany({ book: req.params.id });
-    await Sales.deleteMany({ book: req.params.id });
-    await Book.findByIdAndDelete(req.params.id);
-
-    await purgeBooksCache();
-
-    res.json({ message: 'Libro y todos sus datos relacionados eliminados correctamente' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
 
 module.exports = router;

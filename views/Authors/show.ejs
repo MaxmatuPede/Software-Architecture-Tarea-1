@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= author.name %></title>
+</head>
+<body>
+  <h1><%= author.name %></h1>
+  <p><strong>Date of Birth:</strong> <%= author.dateOfBirth.toDateString() %></p>
+  <p><strong>Country:</strong> <%= author.countryOfOrigin %></p>
+  <p><strong>About:</strong> <%= author.shortDescription %></p>
+
+  <% const imgSrc = author.photoUrl || author.image; %>
+  <% if (imgSrc) { %>
+    <img src="<%= imgSrc %>" alt="<%= author.name %>" width="200" />
+  <% } else { %>
+    <p>Este autor no tiene imagen.</p>
+  <% } %>
+
+  <p><a href="/?model=authors">⬅ Volver</a></p>
+</body>
+</html>

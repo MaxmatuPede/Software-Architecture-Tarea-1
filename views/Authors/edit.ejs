@@ -1,7 +1,48 @@
-<form action="/api/authors/<%= author._id %>?_method=PUT" method="post">
-  <label>Nombre: <input name="name" value="<%= author.name %>" required></label><br>
-  <label>Fecha de nacimiento: <input name="dateOfBirth" type="date" value="<%= author.dateOfBirth ? author.dateOfBirth.toISOString().slice(0,10) : '' %>"></label><br>
-  <label>País: <input name="countryOfOrigin" value="<%= author.countryOfOrigin %>"></label><br>
-  <label>Descripción: <textarea name="shortDescription"><%= author.shortDescription %></textarea></label><br>
-  <button type="submit">Actualizar autor</button>
+<h1>Editar autor</h1>
+
+<form action="/api/authors/<%= author._id %>?_method=PUT" method="post" enctype="multipart/form-data">
+  <label>Nombre:
+    <input name="name" value="<%= author.name %>" required>
+  </label><br>
+
+  <label>Fecha de nacimiento:
+    <input name="dateOfBirth" type="date" value="<%= author.dateOfBirth ? author.dateOfBirth.toISOString().slice(0,10) : '' %>">
+  </label><br>
+
+  <label>País:
+    <input name="countryOfOrigin" value="<%= author.countryOfOrigin %>">
+  </label><br>
+
+  <label>Descripción:
+    <textarea name="shortDescription"><%= author.shortDescription %></textarea>
+  </label><br>
+
+  <fieldset style="margin-top:1rem;">
+    <legend>Foto del autor</legend>
+
+    <% if (author.photoUrl || author.photoPath) { %>
+      <div style="margin-bottom:.5rem;">
+        <strong>Actual:</strong><br>
+        <img
+          src="<%= author.photoUrl || ('/uploads/' + author.photoPath) %>"
+          alt="Foto del autor"
+          style="max-width:160px; height:auto; border:1px solid #ddd; padding:4px; border-radius:6px;"
+        >
+      </div>
+
+      <label style="display:block; margin:.5rem 0;">
+        <input type="checkbox" name="removePhoto" value="1">
+        Eliminar foto actual
+      </label>
+    <% } %>
+
+    <label style="display:block; margin-top:.5rem;">
+      Subir nueva foto (opcional):
+      <input type="file" name="photo" accept="image/*">
+    </label>
+
+    <input type="hidden" name="existingPhotoPath" value="<%= author.photoPath || '' %>">
+  </fieldset>
+
+  <button type="submit" style="margin-top:1rem;">Actualizar autor</button>
 </form>

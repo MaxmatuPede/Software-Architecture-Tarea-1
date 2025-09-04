@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= book.name %></title>
+</head>
+<body>
+  <h1><%= book.name %></h1>
+  <p><strong>Resumen:</strong> <%= book.summary %></p>
+  <p><strong>fecha de publicación:</strong> <%= book.dateOfPublication.toDateString() %></p>
+
+  <p><strong>Autor:</strong> 
+    <% if (book.author) { %>
+      <a href="/authors/<%= book.author._id %>"><%= book.author.name %></a>
+    <% } else { %>
+      Desconocido
+    <% } %>
+  </p>
+
+  <% if (book.coverUrl) { %>
+    <img src="<%= book.coverUrl %>" alt="<%= book.name %>" width="200" />
+  <% } else { %>
+    <p>Imagen de cobertura faltante.</p>
+  <% } %>
+
+  <% if (book.totalSales !== undefined) { %>
+    <p><strong>Ventas totales:</strong> <%= book.totalSales %></p>
+  <% } %>
+
+  <p><a href="/?model=books">⬅ Volver</a></p>
+</body>
+</html>

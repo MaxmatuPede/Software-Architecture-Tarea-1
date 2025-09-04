@@ -1,24 +1,37 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const methodOverride = require('method-override');
+const path = require('path');
 const app = express();
 const port = 3000;
+
+const SERVE_STATIC = process.env.SERVE_STATIC === 'true';
 
 const { getAllAuthors } = require('./routes/services/authorCache');
 const { getAllBooks } = require('./routes/services/bookCache');
 const { getAllReviews } = require('./routes/services/reviewCache');
 const { getAllSales } = require('./routes/services/salesCache');
 
-const Author = require('./models/Author');
-const Book = require('./models/Book');
-const Review = require('./models/Review');
-const Sales = require('./models/Sales');
-
 require('./cache');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
+app.set('trust proxy', true);
+
+if (SERVE_STATIC) {
+  console.log('App sirviendo archivos estáticos');
+  app.use(
+    '/uploads',
+    express.static(path.join(__dirname, 'public', 'uploads'), {
+      maxAge: '1y',
+      immutable: true,
+      fallthrough: false,
+    })
+  );
+} else {
+  console.log('Varnish sirviendo archivos estáticos')
+}
 
 // Base de datos
 
@@ -33,9 +46,7 @@ mongoose.connection.on('error', (err) => {
 });
 
 //NAvegacion
-
 app.set('view engine', 'ejs');
-app.use(express.static('public'));
 
 // Rutas
 //Esto se debera cambiar (creo) lo encerrado entre los 2 textos
@@ -86,3 +97,4 @@ app.use('/reports', require('./routes/reports'));
 app.listen(port, () => {
   console.log(`Servidor corriendo en http://localhost:${port}`);
 });
+module.exports = app;

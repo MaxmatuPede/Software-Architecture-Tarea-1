@@ -1,7 +1,26 @@
-<form action="/api/authors" method="post">
-  <label>Nombre: <input name="name" required></label><br>
-  <label>Fecha de nacimiento: <input name="dateOfBirth" type="date"></label><br>
-  <label>País: <input name="countryOfOrigin"></label><br>
-  <label>Descripción: <textarea name="shortDescription"></textarea></label><br>
-  <button type="submit">Crear autor</button>
+<h1>Nuevo Autor</h1>
+
+<form action="/api/authors" method="post" enctype="multipart/form-data">
+  <label>Nombre:
+    <input name="name" required>
+  </label><br>
+
+  <label>Fecha de nacimiento:
+    <input name="dateOfBirth" type="date">
+  </label><br>
+
+  <label>País:
+    <input name="countryOfOrigin">
+  </label><br>
+
+  <label>Descripción:
+    <textarea name="shortDescription"></textarea>
+  </label><br>
+
+  <fieldset style="margin-top:1rem;">
+    <legend>Foto del autor</legend>
+    <input type="file" name="photo" accept="image/*">
+  </fieldset>
+
+  <button type="submit" style="margin-top:1rem;">Crear autor</button>
 </form>

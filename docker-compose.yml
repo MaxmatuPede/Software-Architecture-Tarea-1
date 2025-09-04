@@ -7,8 +7,11 @@ services:
     depends_on:
       - mongodb
       - redis
+    environment:
+      - SERVE_STATIC=${SERVE_STATIC}
     volumes:
       - .:/usr/src/app
+      - ./public/uploads:/usr/src/app/public/uploads
 
 
   mongodb:
@@ -32,6 +35,23 @@ services:
     depends_on:
       - app
       - mongodb
+
+  varnish:
+    image: varnish:7
+    container_name: varnish
+    ports:
+      - "8080:80"
+    depends_on:
+      - app
+    volumes:
+      - ./default.vcl:/etc/varnish/default.vcl
+    command: >
+      varnishd -F
+               -a :80
+               -f /etc/varnish/default.vcl
+               -s malloc,512m
+    restart: unless-stopped
+
 
 volumes:
   mongo_data:
