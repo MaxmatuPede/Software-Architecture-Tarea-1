@@ -7,8 +7,11 @@ const router = express.Router();
 const Author = require('../models/Author');
 const { getAuthorById, getAllAuthors, purgeAuthorCache } = require('./services/authorCache');
 const buildPublicUrl = require('../utils/publicUrl');
+const { UPLOAD_PATH } = require('../config/static');
+const AUTHORS_DIR = path.join(UPLOAD_PATH, 'authors');
 
-const AUTHORS_DIR = path.join(__dirname, '..', 'public', 'uploads', 'authors');
+fs.mkdirSync(AUTHORS_DIR, { recursive: true });
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, AUTHORS_DIR),
   filename: (req, file, cb) => {
@@ -21,7 +24,7 @@ const upload = multer({ storage, fileFilter, limits: { fileSize: 5 * 1024 * 1024
 
 async function removeFileIfExists(relativePath) {
   if (!relativePath) return;
-  const full = path.join(__dirname, '..', 'public', 'uploads', relativePath);
+  const full = path.join(UPLOAD_PATH, relativePath);
   try { await fs.promises.unlink(full); } catch (_) {}
 }
 
@@ -31,7 +34,7 @@ router.get('/', async (req, res) => {
     const authors = await getAllAuthors();
     const enriched = authors.map(a => ({
       ...a,
-      photoUrl: a.photoPath ? buildPublicUrl(req, a.photoPath) : null
+      photoUrl: a.photoPath ? buildPublicUrl(a.photoPath) : null
     }));
     res.json(enriched);
   } catch (error) {
@@ -62,7 +65,7 @@ router.get('/:id', async (req, res) => {
     if (!author) return res.status(404).json({ message: 'Autor no encontrado' });
 
     const out = author.toObject ? author.toObject() : author;
-    out.photoUrl = author.photoPath ? buildPublicUrl(req, author.photoPath) : null;
+    out.photoUrl = author.photoPath ? buildPublicUrl(author.photoPath) : null;
     res.json(out);
   } catch (error) {
     res.status(500).json({ message: error.message });

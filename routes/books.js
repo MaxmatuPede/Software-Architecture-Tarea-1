@@ -1,4 +1,3 @@
-// routes/books.js
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
@@ -7,8 +6,11 @@ const multer = require('multer');
 const router = express.Router();
 const Book = require('../models/Book');
 const buildPublicUrl = require('../utils/publicUrl');
+const { UPLOAD_PATH } = require('../config/static');
+const BOOKS_DIR = path.join(UPLOAD_PATH, 'books');
 
-const BOOKS_DIR = path.join(__dirname, '..', 'public', 'uploads', 'books');
+fs.mkdirSync(BOOKS_DIR, { recursive: true });
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, BOOKS_DIR),
   filename: (req, file, cb) => {
@@ -21,7 +23,7 @@ const upload = multer({ storage, fileFilter, limits: { fileSize: 5 * 1024 * 1024
 
 async function removeFileIfExists(relativePath) {
   if (!relativePath) return;
-  const full = path.join(__dirname, '..', 'public', 'uploads', relativePath);
+  const full = path.join(UPLOAD_PATH, relativePath);
   try { await fs.promises.unlink(full); } catch (_) {}
 }
 
@@ -30,7 +32,7 @@ router.get('/', async (req, res) => {
   const books = await Book.find().populate('author');
   const enriched = books.map(b => ({
     ...b.toObject(),
-    coverUrl: b.coverUrl ? buildPublicUrl(req, b.coverUrl) : null
+    coverUrl: b.coverUrl ? buildPublicUrl(b.coverUrl) : null
   }));
   res.json(enriched);
 });
@@ -41,7 +43,7 @@ router.post('/', upload.single('cover'), async (req, res) => {
     const body = { ...req.body };
     if (req.file) body.coverUrl = path.posix.join('books', req.file.filename);
 
-    const saved = await new Book(body).save();
+    await new Book(body).save();
     res.redirect('/?model=books');
   } catch (e) {
     res.status(400).json({ message: e.message });

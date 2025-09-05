@@ -22,7 +22,7 @@ router.get('/:id/edit', async (req, res) => {
     const authors = await Author.find().select('_id name').sort('name');
 
     const book = bookDoc.toObject();
-    book.coverUrl = book.coverUrl ? buildPublicUrl(req, book.coverUrl) : null;
+    book.coverUrl = book.coverUrl ? buildPublicUrl(book.coverUrl) : null;
 
     res.render('Books/edit', { book, authors });
   } catch (e) {
@@ -37,7 +37,7 @@ router.get('/:id', async (req, res) => {
     if (!bookDoc) return res.status(404).send('Libro no encontrado');
 
     const book = bookDoc.toObject();
-    book.coverUrl = book.coverUrl ? buildPublicUrl(req, book.coverUrl) : null;
+    book.coverUrl = book.coverUrl ? buildPublicUrl(book.coverUrl) : null;
 
     res.render('Books/show', { book });
   } catch (err) {

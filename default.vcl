@@ -10,7 +10,6 @@ import std;
 sub vcl_recv {
   set req.backend_hint = app;
 
-  # Si hay Authorization, evita cachear
   if (req.http.Authorization) {
     return (pass);
   }
@@ -19,9 +18,7 @@ sub vcl_recv {
 }
 
 sub vcl_backend_response {
-  # Cachea agresivo /uploads y estáticos
   if (bereq.url ~ "^/uploads/" ||
-      bereq.url ~ "^/assets/" ||
       bereq.url ~ "\.(png|jpe?g|gif|webp|svg|ico|css|js)(\?.*)?$") {
     set beresp.ttl = 24h;
     if (beresp.http.Set-Cookie) { unset beresp.http.Set-Cookie; }

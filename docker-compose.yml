@@ -2,21 +2,20 @@ services:
   app:
     build: .
     container_name: app
+    profiles: ["base", "cache", "proxy", "search engine", "all"]
     ports:
       - "3000:3000"
-    depends_on:
-      - mongodb
-      - redis
     environment:
-      - SERVE_STATIC=${SERVE_STATIC}
+      - STATIC_PREFIX=${STATIC_PREFIX:-/uploads}
+      - UPLOAD_PATH=${UPLOAD_PATH:-/usr/src/app/public/uploads}
     volumes:
       - .:/usr/src/app
       - ./public/uploads:/usr/src/app/public/uploads
 
-
   mongodb:
     image: mongo:6
     container_name: db
+    profiles: ["base", "cache", "proxy"]
     restart: always
     ports:
       - "27017:27017"
@@ -26,23 +25,18 @@ services:
   redis:
     image: redis:7
     container_name: redis
+    profiles: ["cache"]
     restart: always
     ports:
       - "6379:6379"
-  seed:
-    build: .
-    command: ["node", "seed.js"]
-    depends_on:
-      - app
-      - mongodb
-
   varnish:
     image: varnish:7
     container_name: varnish
-    ports:
-      - "8080:80"
+    profiles: ["proxy"]
     depends_on:
       - app
+    ports:
+      - "8080:80"
     volumes:
       - ./default.vcl:/etc/varnish/default.vcl
     command: >
@@ -52,6 +46,13 @@ services:
                -s malloc,512m
     restart: unless-stopped
 
+  seed:
+    build: .
+    command: ["node", "seed.js"]
+    profiles: ["base", "cache", "proxy", "search engine", "all"]
+    depends_on:
+      - app
+      - mongodb
 
 volumes:
   mongo_data:

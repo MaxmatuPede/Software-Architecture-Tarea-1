@@ -1,11 +1,9 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const methodOverride = require('method-override');
-const path = require('path');
 const app = express();
 const port = 3000;
 
-const SERVE_STATIC = process.env.SERVE_STATIC === 'true';
 
 const { getAllAuthors } = require('./routes/services/authorCache');
 const { getAllBooks } = require('./routes/services/bookCache');
@@ -17,21 +15,24 @@ require('./cache');
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
+
+// proxy
+
+const {
+  UPLOAD_PATH,
+  STATIC_PREFIX,
+} = require('./config/static'); 
+
 app.set('trust proxy', true);
 
-if (SERVE_STATIC) {
-  console.log('App sirviendo archivos estáticos');
-  app.use(
-    '/uploads',
-    express.static(path.join(__dirname, 'public', 'uploads'), {
-      maxAge: '1y',
-      immutable: true,
-      fallthrough: false,
-    })
-  );
-} else {
-  console.log('Varnish sirviendo archivos estáticos')
-}
+app.use(
+  STATIC_PREFIX,
+  express.static(UPLOAD_PATH, {
+    maxAge: '1y',
+    immutable: true,
+    fallthrough: false,
+  })
+);
 
 // Base de datos
 
