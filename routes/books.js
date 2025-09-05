@@ -7,8 +7,14 @@ const router = express.Router();
 const Book = require('../models/Book');
 const buildPublicUrl = require('../utils/publicUrl');
 const { UPLOAD_PATH } = require('../config/static');
-const BOOKS_DIR = path.join(UPLOAD_PATH, 'books');
 
+const {
+  getAllBooks,
+  getBookById,
+  purgeAfterBookChange,
+} = require('./services/bookCache');
+
+const BOOKS_DIR = path.join(UPLOAD_PATH, 'books');
 fs.mkdirSync(BOOKS_DIR, { recursive: true });
 
 const storage = multer.diskStorage({
@@ -16,7 +22,7 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase();
     cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`);
-  }
+  },
 });
 const fileFilter = (req, file, cb) => cb(null, /^image\//.test(file.mimetype));
 const upload = multer({ storage, fileFilter, limits: { fileSize: 5 * 1024 * 1024 } });
@@ -29,37 +35,41 @@ async function removeFileIfExists(relativePath) {
 
 // LIST
 router.get('/', async (req, res) => {
-  const books = await Book.find().populate('author');
-  const enriched = books.map(b => ({
-    ...b.toObject(),
-    coverUrl: b.coverUrl ? buildPublicUrl(b.coverUrl) : null
-  }));
-  res.json(enriched);
+  try {
+    const books = await getAllBooks();
+    const enriched = books.map(b => ({
+      ...b,
+      coverUrl: b.coverUrl ? buildPublicUrl(b.coverUrl) : null,
+    }));
+    res.json(enriched);
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
 });
 
-// CREATE (new)
+// CREATE
 router.post('/', upload.single('cover'), async (req, res) => {
   try {
     const body = { ...req.body };
     if (req.file) body.coverUrl = path.posix.join('books', req.file.filename);
 
-    await new Book(body).save();
+    const saved = await new Book(body).save();
+    await purgeAfterBookChange(String(saved._id));
+
     res.redirect('/?model=books');
   } catch (e) {
     res.status(400).json({ message: e.message });
   }
 });
 
-// UPDATE (edit)
+// UPDATE
 router.put('/:id', upload.single('cover'), async (req, res) => {
   try {
     const current = await Book.findById(req.params.id);
     if (!current) return res.status(404).json({ message: 'Libro no encontrado' });
 
     const wantsRemove = req.body.removeCover === '1' || req.body.removeCover === 'on';
-
-    const updateDoc = {};
-    updateDoc.$set = { ...req.body };
+    const updateDoc = { $set: { ...req.body } };
 
     if (wantsRemove) {
       await removeFileIfExists(current.coverUrl);
@@ -72,17 +82,31 @@ router.put('/:id', upload.single('cover'), async (req, res) => {
       if (updateDoc.$unset) delete updateDoc.$unset.coverUrl;
     }
 
-    await Book.findByIdAndUpdate(req.params.id, updateDoc, {
+    const updated = await Book.findByIdAndUpdate(req.params.id, updateDoc, {
       new: true,
-      runValidators: true
+      runValidators: true,
     });
 
+    await purgeAfterBookChange(String(updated._id));
     res.redirect('/?model=books');
   } catch (e) {
     res.status(400).json({ message: e.message });
   }
 });
 
+// DELETE
+router.delete('/:id', async (req, res) => {
+  try {
+    const book = await Book.findByIdAndDelete(req.params.id);
+    if (!book) return res.status(404).json({ message: 'Libro no encontrado' });
 
+    await removeFileIfExists(book.coverUrl);
+    await purgeAfterBookChange(String(book._id));
+
+    res.json({ message: 'Libro eliminado correctamente' });
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+});
 
 module.exports = router;

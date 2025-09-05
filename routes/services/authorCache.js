@@ -1,34 +1,54 @@
 const { cacheGet, cacheSet, cacheDel } = require('../../cache');
 const Author = require('../../models/Author');
 
-async function getAuthorById(authorId) {
-  const key = `author:${authorId}`;
-  const cached = await cacheGet(key);
-  if (cached !== null) return cached;
+const TTL = 600;
 
-  const author = await Author.findById(authorId);
-  if (author) await cacheSet(key, author, 600);
-  return author;
-}
+// Keys
+const kAll = 'authors:all';
+const kOne = (id) => `author:${id}`;
 
+// GET: all authors
 async function getAllAuthors() {
-  const key = `authors:all`;
-  const cached = await cacheGet(key);
+  const cached = await cacheGet(kAll);
   if (cached !== null) return cached;
 
-  const authors = await Author.find();
-  await cacheSet(key, authors, 600);
+  const authors = await Author.find({})
+    .sort({ name: 1 })
+    .lean();
+
+  await cacheSet(kAll, authors, TTL);
   return authors;
 }
 
-async function purgeAuthorCache(authorId) {
+// GET: author by id (cached)
+async function getAuthorById(authorId) {
+  const key = kOne(authorId);
+  const cached = await cacheGet(key);
+  if (cached !== null) return cached;
+
+  const author = await Author.findById(authorId).lean();
+  if (author) await cacheSet(key, author, TTL);
+  return author;
+}
+
+// PURGES
+async function purgeAuthorById(authorId) {
   if (!authorId) return;
-  await cacheDel(`author:${authorId}`);
-  await cacheDel(`authors:all`);
+  await cacheDel(kOne(authorId));
+}
+
+async function purgeAllAuthors() {
+  await cacheDel(kAll);
+}
+
+async function purgeAfterAuthorChange(authorId) {
+  await Promise.all([purgeAuthorById(authorId), purgeAllAuthors()]);
 }
 
 module.exports = {
-  getAuthorById,
   getAllAuthors,
-  purgeAuthorCache
+  getAuthorById,
+  purgeAuthorById,
+  purgeAllAuthors,
+  purgeAfterAuthorChange,
 };

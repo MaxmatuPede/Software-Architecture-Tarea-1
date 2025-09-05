@@ -1,3 +1,4 @@
+// routes/authors.js
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
@@ -5,7 +6,12 @@ const multer = require('multer');
 
 const router = express.Router();
 const Author = require('../models/Author');
-const { getAuthorById, getAllAuthors, purgeAuthorCache } = require('./services/authorCache');
+const {
+  getAuthorById,
+  getAllAuthors,
+  purgeAfterAuthorChange,
+} = require('./services/authorCache');
+
 const buildPublicUrl = require('../utils/publicUrl');
 const { UPLOAD_PATH } = require('../config/static');
 const AUTHORS_DIR = path.join(UPLOAD_PATH, 'authors');
@@ -34,7 +40,7 @@ router.get('/', async (req, res) => {
     const authors = await getAllAuthors();
     const enriched = authors.map(a => ({
       ...a,
-      photoUrl: a.photoPath ? buildPublicUrl(a.photoPath) : null
+      photoUrl: a.photoPath ? buildPublicUrl(a.photoPath) : null,
     }));
     res.json(enriched);
   } catch (error) {
@@ -48,9 +54,8 @@ router.post('/', upload.single('photo'), async (req, res) => {
     const body = { ...req.body };
     if (req.file) body.photoPath = path.posix.join('authors', req.file.filename);
 
-    const author = new Author(body);
-    const savedAuthor = await author.save();
-    await purgeAuthorCache(savedAuthor._id);
+    const author = await new Author(body).save();
+    await purgeAfterAuthorChange(String(author._id));
 
     res.redirect('/?model=authors');
   } catch (error) {
@@ -58,21 +63,20 @@ router.post('/', upload.single('photo'), async (req, res) => {
   }
 });
 
-// GET ID
+// GET by ID (cached)
 router.get('/:id', async (req, res) => {
   try {
     const author = await getAuthorById(req.params.id);
     if (!author) return res.status(404).json({ message: 'Autor no encontrado' });
 
-    const out = author.toObject ? author.toObject() : author;
-    out.photoUrl = author.photoPath ? buildPublicUrl(author.photoPath) : null;
+    const out = { ...author, photoUrl: author.photoPath ? buildPublicUrl(author.photoPath) : null };
     res.json(out);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-// UPDATE 
+// UPDATE
 router.put('/:id', upload.single('photo'), async (req, res) => {
   try {
     const current = await Author.findById(req.params.id);
@@ -91,16 +95,20 @@ router.put('/:id', upload.single('photo'), async (req, res) => {
       updates.photoPath = path.posix.join('authors', req.file.filename);
     }
 
-    const author = await Author.findByIdAndUpdate(req.params.id, updates, { new: true, runValidators: true });
-    await purgeAuthorCache(author._id);
+    const author = await Author.findByIdAndUpdate(
+      req.params.id,
+      updates,
+      { new: true, runValidators: true }
+    );
 
+    await purgeAfterAuthorChange(String(author._id));
     res.redirect('/?model=authors');
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 });
 
-// DELETE 
+// DELETE
 router.delete('/:id', async (req, res) => {
   try {
     const author = await Author.findById(req.params.id);
@@ -119,7 +127,8 @@ router.delete('/:id', async (req, res) => {
 
     await removeFileIfExists(author.photoPath);
     await Author.findByIdAndDelete(req.params.id);
-    await purgeAuthorCache(req.params.id);
+
+    await purgeAfterAuthorChange(String(req.params.id));
 
     res.json({ message: 'Autor y todos sus datos relacionados eliminados correctamente' });
   } catch (error) {

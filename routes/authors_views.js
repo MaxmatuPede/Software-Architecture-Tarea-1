@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
+const { getAuthorById } = require('./services/authorCache');
 const Author = require('../models/Author');
-const buildPublicUrl = require('../utils/publicUrl'); // <- ensure correct path
+const buildPublicUrl = require('../utils/publicUrl');
 
-router.get('/new', (req, res) => {
-  res.render('Authors/new');
-});
+// new
+router.get('/new', (req, res) => res.render('Authors/new'));
 
+// edit
 router.get('/:id/edit', async (req, res) => {
   try {
     const author = await Author.findById(req.params.id);
@@ -17,16 +18,13 @@ router.get('/:id/edit', async (req, res) => {
   }
 });
 
+// show
 router.get('/:id', async (req, res) => {
   try {
-    const author = await Author.findById(req.params.id);
+    const author = await getAuthorById(req.params.id);
     if (!author) return res.status(404).send('Autor no encontrado');
 
-    const out = author.toObject ? author.toObject() : author;
-    out.photoUrl = author.photoPath
-      ? buildPublicUrl(author.photoPath)
-      : null;
-
+    const out = { ...author, photoUrl: author.photoPath ? buildPublicUrl(author.photoPath) : null };
     res.render('Authors/show', { author: out });
   } catch (err) {
     res.status(500).send(err.message);

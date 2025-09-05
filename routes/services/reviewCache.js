@@ -59,13 +59,6 @@ async function purgeReviewById(reviewId) {
   await cacheDel(kOne(reviewId));
 }
 
-/**
- * Call this after create/update/delete of a review.
- * It invalidates:
- *  - the single review
- *  - the per-book list
- *  - the global list
- */
 async function purgeAfterReviewChange({ reviewId, bookId }) {
   await Promise.all([
     purgeReviewById(reviewId),
