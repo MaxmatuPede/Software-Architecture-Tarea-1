@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Búsqueda - Book Review</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background-color: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #333; text-align: center; margin-bottom: 30px; }
+        .search-form { margin-bottom: 30px; }
+        .search-input { width: 100%; padding: 12px; font-size: 16px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 15px; }
+        .search-options { margin-bottom: 15px; }
+        .search-options label { margin-right: 20px; }
+        .search-btn { background: #007bff; color: white; padding: 12px 24px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        .search-btn:hover { background: #0056b3; }
+        .back-link { display: inline-block; margin-bottom: 20px; color: #007bff; text-decoration: none; }
+        .back-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← Volver al inicio</a>
+        
+        <h1>🔍 Búsqueda de Libros y Reseñas</h1>
+        
+        <form method="POST" action="/search" class="search-form">
+            <input 
+                type="text" 
+                name="query" 
+                placeholder="Buscar en libros y reseñas..." 
+                class="search-input"
+                value="<%= query %>"
+                required
+            >
+            
+            <div class="search-options">
+                <label>
+                    <input type="radio" name="type" value="all" <%= type === 'all' ? 'checked' : '' %>>
+                    Libros y Reseñas
+                </label>
+                <label>
+                    <input type="radio" name="type" value="books" <%= type === 'books' ? 'checked' : '' %>>
+                    Solo Libros
+                </label>
+                <label>
+                    <input type="radio" name="type" value="reviews" <%= type === 'reviews' ? 'checked' : '' %>>
+                    Solo Reseñas
+                </label>
+            </div>
+            
+            <button type="submit" class="search-btn">Buscar</button>
+        </form>
+        
+        <div style="background: #e9ecef; padding: 15px; border-radius: 4px; font-size: 14px; color: #6c757d;">
+            <strong>Ejemplos de búsqueda:</strong><br>
+            • "aventura" - busca libros y reseñas que contengan la palabra aventura<br>
+            • "excelente libro" - busca reseñas que mencionen estas palabras<br>
+            • "realismo mágico" - busca libros del género o reseñas que lo mencionen
+        </div>
+    </div>
+</body>
+</html>

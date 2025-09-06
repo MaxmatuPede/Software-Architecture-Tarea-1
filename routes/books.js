@@ -2,17 +2,18 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
-
 const router = express.Router();
 const Book = require('../models/Book');
 const buildPublicUrl = require('../utils/publicUrl');
 const { UPLOAD_PATH } = require('../config/static');
-
 const {
   getAllBooks,
   getBookById,
   purgeAfterBookChange,
 } = require('./services/bookCache');
+
+// ⬇️ AGREGAR OPENSEARCH
+const searchService = require('./services/searchService');
 
 const BOOKS_DIR = path.join(UPLOAD_PATH, 'books');
 fs.mkdirSync(BOOKS_DIR, { recursive: true });
@@ -24,6 +25,7 @@ const storage = multer.diskStorage({
     cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`);
   },
 });
+
 const fileFilter = (req, file, cb) => cb(null, /^image\//.test(file.mimetype));
 const upload = multer({ storage, fileFilter, limits: { fileSize: 5 * 1024 * 1024 } });
 
@@ -52,10 +54,15 @@ router.post('/', upload.single('cover'), async (req, res) => {
   try {
     const body = { ...req.body };
     if (req.file) body.coverUrl = path.posix.join('books', req.file.filename);
-
+    
     const saved = await new Book(body).save();
+    await saved.populate('author'); // Para tener datos completos de autor
+    
     await purgeAfterBookChange(String(saved._id));
-
+    
+    // ⬇️ SINCRONIZAR CON OPENSEARCH
+    await searchService.indexBook(saved);
+    
     res.redirect('/?model=books');
   } catch (e) {
     res.status(400).json({ message: e.message });
@@ -85,9 +92,13 @@ router.put('/:id', upload.single('cover'), async (req, res) => {
     const updated = await Book.findByIdAndUpdate(req.params.id, updateDoc, {
       new: true,
       runValidators: true,
-    });
+    }).populate('author'); // Para tener datos completos de autor
 
     await purgeAfterBookChange(String(updated._id));
+    
+    // ⬇️ SINCRONIZAR CON OPENSEARCH
+    await searchService.indexBook(updated);
+
     res.redirect('/?model=books');
   } catch (e) {
     res.status(400).json({ message: e.message });
@@ -102,6 +113,9 @@ router.delete('/:id', async (req, res) => {
 
     await removeFileIfExists(book.coverUrl);
     await purgeAfterBookChange(String(book._id));
+    
+    // ⬇️ SINCRONIZAR CON OPENSEARCH
+    await searchService.deleteBook(String(book._id));
 
     res.json({ message: 'Libro eliminado correctamente' });
   } catch (e) {

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados: <%= query %> - Book Review</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background-color: #f5f5f5; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #333; margin-bottom: 20px; }
+        .search-summary { background: #e7f3ff; padding: 15px; border-radius: 4px; margin-bottom: 30px; }
+        .results-section { margin-bottom: 30px; }
+        .result-item { border: 1px solid #ddd; border-radius: 4px; padding: 20px; margin-bottom: 15px; background: #fafafa; }
+        .result-title { font-size: 18px; font-weight: bold; color: #333; margin-bottom: 8px; }
+        .result-meta { font-size: 14px; color: #666; margin-bottom: 10px; }
+        .result-content { line-height: 1.6; }
+        .score { background: #28a745; color: white; padding: 3px 8px; border-radius: 3px; font-size: 12px; }
+        .back-link { display: inline-block; margin-bottom: 20px; color: #007bff; text-decoration: none; }
+        .back-link:hover { text-decoration: underline; }
+        .no-results { text-align: center; color: #666; font-style: italic; }
+        .new-search { background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block; margin-top: 20px; }
+        .new-search:hover { background: #0056b3; color: white; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/search" class="back-link">← Nueva búsqueda</a>
+        
+        <h1>🔍 Resultados para: "<%= query %>"</h1>
+        
+        <div class="search-summary">
+            <strong>Total encontrado:</strong> 
+            <%= results.books.length + results.reviews.length %> resultados
+            (<%= results.books.length %> libros, <%= results.reviews.length %> reseñas)
+        </div>
+        
+        <% if (results.books.length > 0) { %>
+        <div class="results-section">
+            <h2>📚 Libros (<%= results.books.length %>)</h2>
+            <% results.books.forEach(book => { %>
+            <div class="result-item">
+                <div class="result-title"><%= book.name %></div>
+                <div class="result-meta">
+                    Autor: <%= book.author_name || 'Desconocido' %>
+                    <% if (book._score) { %>
+                        <span class="score">Relevancia: <%= (book._score * 100).toFixed(0) %>%</span>
+                    <% } %>
+                </div>
+                <div class="result-content"><%= book.summary %></div>
+            </div>
+            <% }) %>
+        </div>
+        <% } %>
+        
+        <% if (results.reviews.length > 0) { %>
+        <div class="results-section">
+            <h2>💬 Reseñas (<%= results.reviews.length %>)</h2>
+            <% results.reviews.forEach(review => { %>
+            <div class="result-item">
+                <div class="result-title">Reseña de: <%= review.book_name %></div>
+                <div class="result-meta">
+                    Puntuación: <%= review.score %>/5 ⭐ | 
+                    Votos positivos: <%= review.upvotes %>
+                    <% if (review._score) { %>
+                        <span class="score">Relevancia: <%= (review._score * 100).toFixed(0) %>%</span>
+                    <% } %>
+                </div>
+                <div class="result-content"><%= review.review_content %></div>
+            </div>
+            <% }) %>
+        </div>
+        <% } %>
+        
+        <% if (results.books.length === 0 && results.reviews.length === 0) { %>
+        <div class="no-results">
+            <h3>No se encontraron resultados</h3>
+            <p>Intenta con diferentes palabras clave o términos más generales.</p>
+            <a href="/search" class="new-search">Nueva búsqueda</a>
+        </div>
+        <% } %>
+    </div>
+</body>
+</html>

@@ -2,7 +2,7 @@ services:
   app:
     build: .
     container_name: app
-    profiles: ["base", "cache", "proxy", "search engine", "all"]
+    profiles: ["base", "cache", "proxy", "search", "all"]  
     ports:
       - "3000:3000"
     environment:
@@ -15,7 +15,7 @@ services:
   mongodb:
     image: mongo:6
     container_name: db
-    profiles: ["base", "cache", "proxy"]
+    profiles: ["base", "cache", "proxy", "search", "all"]  
     restart: always
     ports:
       - "27017:27017"
@@ -25,14 +25,15 @@ services:
   redis:
     image: redis:7
     container_name: redis
-    profiles: ["cache"]
+    profiles: ["cache", "all"]
     restart: always
     ports:
       - "6379:6379"
+
   varnish:
     image: varnish:7
     container_name: varnish
-    profiles: ["proxy"]
+    profiles: ["proxy", "all"]
     depends_on:
       - app
     ports:
@@ -46,13 +47,29 @@ services:
                -s malloc,512m
     restart: unless-stopped
 
+  opensearch:
+    image: opensearchproject/opensearch:2.11.1
+    container_name: opensearch
+    profiles: ["search", "all"]
+    environment:
+      - discovery.type=single-node
+      - plugins.security.disabled=true
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=YourStrongPassword123!"
+    ports:
+      - "9200:9200"
+    volumes:
+      - opensearch_data:/usr/share/opensearch/data
+    restart: unless-stopped
+
   seed:
     build: .
     command: ["node", "seed.js"]
-    profiles: ["base", "cache", "proxy", "search engine", "all"]
+    profiles: ["base", "cache", "proxy", "search", "all"]  
     depends_on:
       - app
       - mongodb
 
 volumes:
   mongo_data:
+  opensearch_data:

@@ -132,6 +132,11 @@
             <a href="/reports" class="menu-item <%= model === 'reports' ? 'active' : '' %>">
                 📊 Tablas
             </a>
+            <% if (typeof searchEnabled !== 'undefined' && searchEnabled) { %>
+            <a href="/search" class="menu-item" style="background: #28a745;">
+                🔍 Búsqueda
+            </a>
+            <% } %>
         </div>
         
         <% if (model && data && data.length > 0) { %>
